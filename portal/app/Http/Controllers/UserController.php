@@ -34,8 +34,10 @@ class UserController extends Controller
         Auth::login($user);
 
         $user -> sendEmailVerificationNotification();
-       
-        return redirect() -> route('verification.notice') -> with('successMessage', 'Konto zostało pomyślnie utworzone');
+
+        return response()->json('success');
+        
+        //return redirect() -> route('verification.notice') -> with('successMessage', 'Konto zostało pomyślnie utworzone');
     }
 
     public function storeEmployer(RegistrationFormRequest $request) 
@@ -51,8 +53,10 @@ class UserController extends Controller
         Auth::login($user);
 
         $user -> sendEmailVerificationNotification();
+
+        return response()->json('success');
        
-        return redirect() -> route('verification.notice') -> with('successMessage', 'Konto zostało pomyślnie utworzone');
+        //return redirect() -> route('verification.notice') -> with('successMessage', 'Konto zostało pomyślnie utworzone');
     }
 
     public function login()
