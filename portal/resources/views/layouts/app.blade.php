@@ -20,6 +20,12 @@
                     <li class="nav-item">
                         <a class="nav-link active" aria-current="page" href="#">Home</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="{{route('dashboard')}}">Strona Główna</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="{{route('subscribe')}}">Subskrypcja</a>
+                    </li>
                     @if(!Auth::check())
                     <li class="nav-item">
                         <a class="nav-link" href="{{route('login')}}">Logowanie</a>

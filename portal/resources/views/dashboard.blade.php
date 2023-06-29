@@ -3,10 +3,23 @@
 @section('content')
 <div class="container mt-5">
     Witaj, {{auth() -> user() -> name}}
+    @if(!auth()->user()->billing_ends)
+        @if(Auth::check() && auth() -> user() -> user_type == 'employer')
+            <p>Twoja subskrypcja {{now() -> format('Y-m-d') > auth() -> user() -> user_trial ? 'straciła ważność' : 'straci ważność'}} dnia {{auth() -> user() -> user_trial}}</p>
+        @endif
+    @endif
     @if(Auth::check() && auth() -> user() -> user_type == 'employer')
-    <p>Twoja subskrypcja {{now() -> format('Y-m-d') > auth() -> user() -> user_trial ? 'straciła ważność' : 'straci ważność'}} dnia {{auth() -> user() -> user_trial}}</p>
+            <p>Twoja subskrypcja {{now() -> format('Y-m-d') > auth() -> user() -> billing_ends ? 'straciła ważność' : 'straci ważność'}} dnia {{auth() -> user() -> billing_ends}}</p>
     @endif
     <div class="row justify-content-center">
+
+    @if(Session::has('success'))
+        <div class="alert alert-success">{{Session::get('success')}}</div>
+    @endif
+
+    @if(Session::has('error'))
+        <div class="alert alert-danger">{{Session::get('error')}}</div>
+    @endif
         <div class="col-md-3">
             <div class="card-counter primary">
                 <p class="text-center mt-3 lead">Profil Użytkownika</p>
