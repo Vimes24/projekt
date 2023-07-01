@@ -6,24 +6,25 @@ use App\Http\Requests\RegistrationFormRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
     const JOB_SEEKER = 'seeker';
     const JOB_POSTER = 'employer';
 
-    public function createSeeker() 
+    public function createSeeker()
     {
-        return view('user.seeker-register');        
+        return view('user.seeker-register');
     }
 
-    public function createEmployer() 
+    public function createEmployer()
     {
-        return view('user.employer-register');        
+        return view('user.employer-register');
     }
 
-    public function storeSeeker(RegistrationFormRequest $request) 
-    {   
+    public function storeSeeker(RegistrationFormRequest $request)
+    {
         $user = User::create([
             'name' => request('name'),
             'email' => request('email'),
@@ -33,29 +34,29 @@ class UserController extends Controller
 
         Auth::login($user);
 
-        $user -> sendEmailVerificationNotification();
+        $user->sendEmailVerificationNotification();
 
         return response()->json('success');
-        
+
         //return redirect() -> route('verification.notice') -> with('successMessage', 'Konto zostało pomyślnie utworzone');
     }
 
-    public function storeEmployer(RegistrationFormRequest $request) 
-    {   
+    public function storeEmployer(RegistrationFormRequest $request)
+    {
         $user = User::create([
             'name' => request('name'),
             'email' => request('email'),
             'password' => bcrypt(request('password')),
             'user_type' => self::JOB_POSTER,
-            'user_trial' => now() -> addWeek()
+            'user_trial' => now()->addWeek()
         ]);
 
         Auth::login($user);
 
-        $user -> sendEmailVerificationNotification();
+        $user->sendEmailVerificationNotification();
 
         return response()->json('success');
-       
+
         //return redirect() -> route('verification.notice') -> with('successMessage', 'Konto zostało pomyślnie utworzone');
     }
 
@@ -71,11 +72,14 @@ class UserController extends Controller
             'password' => 'required'
         ]);
 
-        $credentials = $request -> only('email', 'password');
+        $credentials = $request->only('email', 'password');
 
-        if(Auth::attempt($credentials))
-        {
-            return redirect() -> intended('dashboard');
+        if (Auth::attempt($credentials)) {
+            if(auth()->user()->user_type == 'employer'){
+                return redirect()->to('dashboard');
+            }else{
+                return redirect()->to('/');
+            }
         }
 
         return 'Podano błędny email lub hasło';
@@ -83,10 +87,61 @@ class UserController extends Controller
 
     public function logout()
     {
-        auth() -> logout();
+        auth()->logout();
 
-        return redirect() -> route('login');
+        return redirect()->route('login');
     }
 
+    public function profile()
+    {
+        return view('profile.index');
+    }
 
+    public function seekerProfile()
+    {
+        return view('seeker.index');
+    }
+
+    public function changePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => 'required',
+            'password' => 'required|min:3|confirmed',
+        ]);
+
+        $user = auth()->user();
+        if(!Hash::check($request->current_password, $user->password)){
+            return back()->with('error', 'Podane hasło jest nieprawidłowe');
+        };
+
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        return back()->with('success', 'Hasło zostało zmienione');
+    }
+
+    public function uploadResume(Request $request){
+        $this->validate($request, [
+            'resume' => 'required|mimes:pdf,doc,docx',
+        ]);
+
+        if ($request->hasFile('resume')) {
+            $resume = $request->file('resume')->store('resume', 'public');
+            User::find(auth()->user()->id)->update(['resume' => $resume]);
+
+            return back()->with('success', 'Zaktualizowano dane pracownika');
+
+        }
+    }
+
+    public function update(Request $request)
+    {
+        if ($request->hasFile('profile_pic')) {
+            $imagePath = $request->file('profile_pic')->store('profile', 'public');
+            User::find(auth()->user()->id)->update(['profile_pic' => $imagePath]);
+        }
+        User::find(auth()->user()->id)->update($request->except('profile_pic'));
+
+        return back()->with('success', 'Zaktualizowano profil użytkownika');
+    }
 }
