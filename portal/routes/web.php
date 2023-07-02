@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ApplicantController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PostJobController;
@@ -67,3 +68,8 @@ Route::get('job/{listing}/edit', [PostJobController::class, 'edit'])->name('job.
 Route::put('job/{id}/edit', [PostJobController::class, 'update'])->name('job.update');
 Route::get('job', [PostJobController::class, 'index'])->name('job.index');
 Route::delete('job/{id}/delete', [PostJobController::class, 'destroy'])->name('job.delete');
+
+Route::get('applicants', [ApplicantsController::class, 'index'])->name('applicants.index'); 
+Route::get('applicants/{listing:slug}', [ApplicantsController::class, 'show'])->name('applicants.show'); 
+Route::post('shortlist/{listingId}/{userId}', [ApplicantController::class, 'shortlist'])->name('applicants.shortlist');
+
