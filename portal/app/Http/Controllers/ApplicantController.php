@@ -33,4 +33,10 @@ class ApplicantController extends Controller
 
         return back();
     }
+
+    public function apply($listingId){
+        $user = auth()->user();
+        $user->listings()->syncWithoutDetaching($listingId);
+        return back()->with('success', 'Twoja aplikacja zostałą pomyślnie złożona');
+    }
 }

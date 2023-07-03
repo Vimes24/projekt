@@ -3,6 +3,8 @@
 use App\Http\Controllers\ApplicantController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\FileUploadController;
+use App\Http\Controllers\JoblistingController;
 use App\Http\Controllers\PostJobController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Middleware\CheckAuth;
@@ -23,9 +25,10 @@ use Illuminate\Foundation\Auth\EmailVerificationRequest;
 |
 */
 
-Route::get('/', function () {
-    return view('home');
-});
+Route::get('/', [JoblistingController::class, 'index']);
+Route::get('/jobs/{listing:slug}', [JoblistingController::class, 'show'])->name('job.show');
+
+Route::post('/resume/upload', [FileUploadController::class, 'store'])->middleware('auth');
 
 Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
     $request->fulfill();
@@ -72,4 +75,4 @@ Route::delete('job/{id}/delete', [PostJobController::class, 'destroy'])->name('j
 Route::get('applicants', [ApplicantsController::class, 'index'])->name('applicants.index'); 
 Route::get('applicants/{listing:slug}', [ApplicantsController::class, 'show'])->name('applicants.show'); 
 Route::post('shortlist/{listingId}/{userId}', [ApplicantController::class, 'shortlist'])->name('applicants.shortlist');
-
+Route::post('/application/{listingId}/submit', [ApplicantController::class, 'apply'])->name('application.submit');
